@@ -8,9 +8,6 @@ int main(int argc, char *argv[])
 {
     // Example R2
     //  q(0,0) to q(pi, pi)
-    //  use two Rn functions Linear and Quintic
-    //  log Linear and Quintic result to txt file
-    //  use matlab to compare result
 
     // q0 = [0 0]
     vctDoubleVec q0; q0.SetSize(2); q0.SetAll(0.0);
