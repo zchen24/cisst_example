@@ -6,9 +6,8 @@ close all;
 
 % copyfile('/PATH/TO/FunctionRnLog.txt', './');
 
-
 % open file & preprocess 
-fid = fopen('FunctionRnLog.txt', 'r');
+fid = fopen('LinearRnLog.txt', 'r');
 
 % scan
 data = textscan(fid, ['t = %f q = %f %f \n']);
