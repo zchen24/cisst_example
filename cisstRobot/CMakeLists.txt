@@ -13,10 +13,10 @@ if (cisst_FOUND_AS_REQUIRED)
   # load cisst configuration
   include (${CISST_USE_FILE})
 
-  add_executable (FuntionRn mainFunctionRn.cpp)
+  add_executable (LinearRn mainLinearRn.cpp)
   
   # link against cisst libraries (and dependencies)
-  cisst_target_link_libraries (FuntionRn ${REQUIRED_CISST_LIBRARIES})
+  cisst_target_link_libraries (LinearRn ${REQUIRED_CISST_LIBRARIES})
 
   # link other libraries
   # target_link_libraries (sawRobotIO1394QtConsole ${sawRobotIO1394_LIBRARIES})
