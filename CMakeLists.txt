@@ -11,8 +11,8 @@ add_subdirectory(cisstVector)
 # cisstRobot
 add_subdirectory(cisstRobot)
 
-# mtsTask example
-# add_subdirectory(mtsTask)
+# mtsTutorial
+add_subdirectory(mtsTutorial)
 
 # svlTutorial
 add_subdirectory(svlTutorial)
