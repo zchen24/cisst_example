@@ -7,3 +7,6 @@ add_subdirectory(cisstLog)
 # mtsComponent
 add_subdirectory(mtsComponent)
 
+# mtsTaskPeriodic
+#add_subdirectory(mtsTaskPeriodic)
+
