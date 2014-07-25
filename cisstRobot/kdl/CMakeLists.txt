@@ -25,3 +25,13 @@ add_executable(kdl_mtm main_mtm.cpp)
 target_link_libraries(kdl_mtm ${orocos_kdl_LIBRARIES})
 cisst_target_link_libraries(kdl_mtm
   ${REQUIRED_CISST_LIBRARIES})
+
+add_executable(kdl_psm main_psm.cpp)
+target_link_libraries(kdl_psm ${orocos_kdl_LIBRARIES})
+cisst_target_link_libraries(kdl_psm
+  ${REQUIRED_CISST_LIBRARIES})
+
+add_executable(kdl_rrbot main_rrbot.cpp)
+target_link_libraries(kdl_rrbot ${orocos_kdl_LIBRARIES})
+cisst_target_link_libraries(kdl_rrbot
+  ${REQUIRED_CISST_LIBRARIES})

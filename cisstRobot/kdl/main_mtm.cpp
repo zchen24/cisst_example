@@ -1,3 +1,7 @@
+// Compare KDL standard & modified DH
+// Zihan Chen
+// 2014-07-24
+
 #include <iostream>
 #include <cisstRobot.h>
 #include <cisstVector.h>
@@ -5,9 +9,8 @@
 #include <kdl/frames_io.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainidsolver_recursive_newton_euler.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
 
-
-// Use DVRK MTM
 
 using namespace KDL;
 
@@ -63,6 +66,8 @@ int main()
     //    Frame::DH(a, alpha, d, theta)
     //    RigidBodyInertia(m, com, RotationalInertia(ixx, iyy, izz, ixy, ixz, iyz));
      Chain robKDLMod;
+     // 0
+     robKDLMod.addSegment(Segment(Joint(Joint::None), Frame::DH_Craig1989(0.0, 0.0, 0.0, 0.0)));
      // 1
      inert = RigidBodyInertia(0.0, KDL::Vector(0, 0, 0), RotationalInertia(0.1, 0.1, 0.1, 0.0, 0.0, 0.0));
      robKDLMod.addSegment(Segment(Joint(Joint::RotZ), Frame::DH_Craig1989(0.0, 0.0, 0.0, 1.5708), inert));
@@ -84,6 +89,11 @@ int main()
      // 7
      inert = RigidBodyInertia(0.0, KDL::Vector(0, 0, 0), RotationalInertia(0.1, 0.1, 0.1, 0.0, 0.0, 0.0));
      robKDLMod.addSegment(Segment(Joint(Joint::RotZ), Frame::DH_Craig1989(0.0, 1.5708, 0.0, 1.5708), inert));
+
+
+     std::cout << "robKDL    nj = " << robKDL.getNrOfJoints() << std::endl;
+     std::cout << "robKDLMod nj = " << robKDLMod.getNrOfJoints()
+               << " ns = " << robKDLMod.getNrOfSegments() << std::endl;
 
 
     // KDL
@@ -124,10 +134,53 @@ int main()
     int ret;
     ret = idSolver.CartToJnt(jnt_q, jnt_qd, jnt_qdd, wrenches, jnt_tau);
     if (ret < 0) std::cerr << "Inverse Dynamics WRONG" << std::endl;
-    std::cout << std::endl << "tau    = " << jnt_tau << std::endl;
+    std::cout << std::endl << "tau     = " << jnt_tau << std::endl;
 
-    ret = idSolverMod.CartToJnt(jnt_q, jnt_qd, jnt_qdd, wrenches, jnt_tau);
-    if (ret < 0) std::cerr << "Inverse Dynamics WRONG" << std::endl;
-    std::cout << std::endl << "tau mod = " << jnt_tau << std::endl;
+    // Mod
+    KDL::JntArray jnt_tau_mod = JntArray(numJnts);
+    KDL::Wrenches wrenches_mod;
+    for (unsigned int i = 0; i < robKDLMod.getNrOfSegments(); i++)
+      wrenches_mod.push_back(KDL::Wrench());
+
+    ret = idSolverMod.CartToJnt(jnt_q, jnt_qd, jnt_qdd, wrenches_mod, jnt_tau_mod);
+    if (ret < 0) std::cerr << "Inverse Dynamics WRONG MOD" << std::endl;
+    std::cout << std::endl << "tau mod = " << jnt_tau_mod << std::endl;
+
+
+#if 1
+    // ---------- Jacobian Test ----------------
+    // WARNING:
+    //   - jac_kdl needs number of cols
+    //   - KDL::changeBase Rotation is current Base Frame w.r.t. Target Frame
+    //   - KDL::changeRefPoint Vector is (PrefNew - PrefOld) w.r.t. current Ref Frame
+    ChainJntToJacSolver jacSolver(robKDL);
+    KDL::Jacobian jac_kdl(numJnts);
+    KDL::Jacobian jac_body_kdl(numJnts);
+    KDL::Jacobian jac_spatial_kdl(numJnts);
+    ret = jacSolver.JntToJac(jnt_q, jac_kdl);
+
+    KDL::changeRefPoint(jac_kdl, KDL::Vector(-tipFrame.p), jac_spatial_kdl);
+    KDL::changeBase(jac_kdl, KDL::Rotation(0, 0, 1, 1, 0, 0, 0, 1, 0), jac_body_kdl);
+
+    std::cout << "ret = " << ret << " row = " << jac_kdl.rows() << " col = " << jac_kdl.columns() << std::endl;
+    std::cout << "Jacobian Spatial KDL" << std::endl
+              << jac_spatial_kdl.data << std::endl << std::endl;
+
+    std::cout << "Jacobian Body KDL" << std::endl
+              << jac_body_kdl.data << std::endl << std::endl;
+
+    // Modified DH
+    ChainJntToJacSolver jacSolverMod(robKDLMod);
+    ret = jacSolverMod.JntToJac(jnt_q, jac_kdl);
+    KDL::changeRefPoint(jac_kdl, KDL::Vector(-tipFrame.p), jac_spatial_kdl);
+    KDL::changeBase(jac_kdl, KDL::Rotation(0, 0, 1, 1, 0, 0, 0, 1, 0), jac_body_kdl);
+
+    std::cout << "  ---- Modified ----" << std::endl;
+    std::cout << "Jacobian Spatial KDL" << std::endl
+              << jac_spatial_kdl.data << std::endl << std::endl;
+
+    std::cout << "Jacobian Body KDL" << std::endl
+              << jac_body_kdl.data << std::endl;
+#endif
 
 }
